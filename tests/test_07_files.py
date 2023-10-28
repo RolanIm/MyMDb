@@ -15,12 +15,12 @@ else:
 
 
 # test .md
-default_md = '# api_yamdb\napi_yamdb\n'
+default_md = '# MyMDb\n'
 filename = 'README.md'
 assert filename in root_dir_content, (
     f'В корне проекта не найден файл `{filename}`'
 )
-
+z
 with open(filename, 'r') as f:
     file = f.read()
     assert file != default_md, (
