@@ -21,6 +21,8 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'rest_framework',
+    'rest_framework_simplejwt',
     'api.apps.ApiConfig',
     'reviews.apps.ReviewsConfig',
 ]
@@ -65,7 +67,6 @@ DATABASES = {
 }
 
 # Password validation
-
 AUTH_PASSWORD_VALIDATORS = [
     {
         'NAME': ('django.contrib.auth.password_validation.'
@@ -97,7 +98,17 @@ USE_L10N = True
 USE_TZ = True
 
 # Static files (CSS, JavaScript, Images)
-
 STATIC_URL = 'static/'
-
 STATICFILES_DIRS = (os.path.join(BASE_DIR, 'static/'),)
+
+REST_FRAMEWORK = {
+    'DEFAULT_PERMISSION_CLASSES':
+        'rest_framework.permissions.IsAuthenticatedOrReadOnly',
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+    )
+}
+
+SIMPLE_JWT = {
+    'ACCESS_TOKE_LIFETIME': timedelta(days=30),
+}
