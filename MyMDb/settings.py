@@ -112,3 +112,5 @@ REST_FRAMEWORK = {
 SIMPLE_JWT = {
     'ACCESS_TOKE_LIFETIME': timedelta(days=30),
 }
+
+AUTH_USER_MODEL = "reviews.Author"
