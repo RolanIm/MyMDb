@@ -113,4 +113,12 @@ SIMPLE_JWT = {
     'ACCESS_TOKE_LIFETIME': timedelta(days=30),
 }
 
-AUTH_USER_MODEL = "reviews.Author"
+AUTH_USER_MODEL = 'reviews.Author'
+
+# SMTP configurations
+EMAIL_BACKEND = config('EMAIL_BACKEND')
+EMAIL_HOST = config('EMAIL_HOST')
+EMAIL_HOST_PORT = config('EMAIL_HOST_PORT')
+EMAIL_USE_TLS = config('EMAIL_USE_TLS')
+EMAIL_HOST_USER = config('EMAIL_HOST_USER')
+EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD')

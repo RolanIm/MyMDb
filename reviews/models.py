@@ -31,7 +31,10 @@ class Author(AbstractUser):
             "unique": _("A user with that username already exists."),
         },
     )
-    email = models.EmailField(_("email address"), blank=True)
+    email = models.EmailField(_("email address"),
+                              unique=True,
+                              blank=True,
+                              max_length=254)
     role = models.CharField(default=USER, choices=ROLES, max_length=9)
     bio = models.TextField()
     first_name = models.CharField(_("first name"),
