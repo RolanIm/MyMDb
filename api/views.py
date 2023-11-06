@@ -1,52 +1,61 @@
-from rest_framework import status
-from rest_framework.decorators import action
-from rest_framework.viewsets import ModelViewSet
-from rest_framework_simplejwt.views import TokenObtainPairView
-from rest_framework.permissions import IsAuthenticated
+from rest_framework import status, generics, views, viewsets
+from rest_framework_simplejwt.tokens import RefreshToken, AccessToken
+from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.response import Response
 
-from django.contrib.auth.tokens import default_token_generator
-from django.core.mail import send_mail
-from django.shortcuts import render
-from django.template.loader import get_template
 from django.shortcuts import get_object_or_404
-
+from django.contrib.auth.tokens import default_token_generator
 from reviews.models import Author
-from MyMDb.settings import EMAIL_HOST_USER
-from .serializers import EmailTokenObtainPairSerializer, AuthorSerializer
+from .utils import send_email
+from .serializers import (GetTokenSerializer,
+                          AuthorSerializer,
+                          SignupSerializer)
 from .permissions import IsAdminUser, IsSuperuser
 
 
-class EmailTokenObtainPairView(TokenObtainPairView):
-    serializer_class = EmailTokenObtainPairSerializer
+class GetTokenView(generics.GenericAPIView):
+    # TODO: create view
+    # TODO: delete last migrations and confirmation_code field in Author model
+    queryset = Author.objects.all()
+    serializer_class = GetTokenSerializer
+    permission_classes = (AllowAny,)
 
-    # @action(detailt=False, methods=['get',])
-    # def signup(self, request):
-    #     user = self.Author.objects.get_or_create()
-    #     confirmation_token = default_token_generator.make_token(request.user)
-    #     data = {'confirmation_token': confirmation_token}
-    #     message = get_template('templates/email_confirmation.txt').render(data)
-    #     send_mail(    ),
-
-    #         subject='Please confirm email.',
-    #         message=message,
-    #         from_email=EMAIL_HOST_USER,
-    #         recipient_list=['email'],
-    #         fail_silently=False
+    # def post(self, request):
+    #
+    #     default_token_generator.check_token(
+    #         user, token=request.data.get('confirmation_code')
     #     )
 
 
-class AuthorViewSet(ModelViewSet):
-    serializer_class = AuthorSerializer
+class SignupView(generics.GenericAPIView):
     queryset = Author.objects.all()
+    serializer_class = SignupSerializer
+    permission_classes = (AllowAny,)
+
+    def post(self, request):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        user = serializer.save()
+        confirmation_code = default_token_generator.make_token(user)
+        data = {
+            'username': user.username,
+            'email': user.email,
+            'confirm_token': confirmation_code
+        }
+        send_email(data)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+class AuthorViewSet(viewsets.ModelViewSet):
+    queryset = Author.objects.all()
+    serializer_class = AuthorSerializer
     permission_classes = (IsAdminUser,)
 
     def get_object(self):
         desired_username = self.kwargs.get('username')
         if desired_username:
-            return self.queryset.get_object_or_404(username=desired_username)
-        else:
-            return self.queryset.get(user=self.request.user)
+            return get_object_or_404(self.queryset, username=desired_username)
+        return self.request.user
 
     def get_permissions(self):
         if (self.action in ('retrieve', 'partial_update')

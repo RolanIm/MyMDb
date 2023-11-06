@@ -34,6 +34,7 @@ class Author(AbstractUser):
     email = models.EmailField(_("email address"),
                               unique=True,
                               blank=True,
+                              null=True,
                               max_length=254)
     role = models.CharField(default=USER, choices=ROLES, max_length=9)
     bio = models.TextField()
@@ -46,6 +47,8 @@ class Author(AbstractUser):
 
     class Meta:
         ordering = ('id',)
+        verbose_name = _('author')
+        verbose_name_plural = _('authors')
 
 
 class Category(models.Model):

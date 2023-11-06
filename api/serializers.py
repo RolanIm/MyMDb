@@ -1,14 +1,21 @@
-from typing import Dict, Any
-from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from rest_framework import serializers
 from reviews.models import Author
 
 
-class EmailTokenObtainPairSerializer(TokenObtainPairSerializer,
-                                     serializers.ModelSerializer):
+class GetTokenSerializer(serializers.ModelSerializer):
 
-    def validate(self, attrs: Dict[str, Any]) -> Dict[str, str]:
-        pass
+    class Meta:
+        model = Author
+        required_fields = ('username', 'confirmation_code')
+        fields = ('username', 'confirmation_code')
+
+
+class SignupSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Author
+        required_fields = ('email', 'username')
+        fields = ('email', 'username')
 
 
 class AuthorSerializer(serializers.ModelSerializer):

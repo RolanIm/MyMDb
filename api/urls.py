@@ -1,18 +1,14 @@
 from django.urls import path, include
-from rest_framework_simplejwt.views import TokenObtainPairView
 from rest_framework import routers
-from .views import EmailTokenObtainPairView, AuthorViewSet
+from .views import GetTokenView, AuthorViewSet, SignupView
 
 router = routers.DefaultRouter()
-router.register(r'users/(?P<username>[\w.@\+\-]+)|(me)',
-                AuthorViewSet)
+router.register(r'users/(?P<username>[\w.@\+\-]+)', AuthorViewSet)
+router.register(r'users/me', AuthorViewSet)
 
 app_name = 'api_reviews'
 urlpatterns = [
     path('v1/', include(router.urls)),
-    # path(
-    #     'v1/auth/token/',
-    #     EmailTokenObtainPairView.as_view(),
-    #     name='token_obtain_pair_view'
-    # ),
+    path('v1/auth/signup/', SignupView.as_view()),
+    # path('v1/auth/token/', GetTokenView.as_view())
 ]
