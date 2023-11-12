@@ -3,11 +3,11 @@ from MyMDb.settings import EMAIL_HOST_USER
 
 
 def send_email(data):
-    message = (f'Dear {data.get("username")}, '
-               f'here are your confirmation code: '
-               f'{data.get("confirm_token")}')
+    message = (f'Dear {data.get("username")},\n'
+               f'Here are your confirmation code: '
+               f'{data.get("confirmation_code")}')
     send_mail(
-        subject='Please confirm email.',
+        subject='Please, confirm your email.',
         message=message,
         from_email=EMAIL_HOST_USER,
         recipient_list=[data.get("email")],

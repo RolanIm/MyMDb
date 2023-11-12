@@ -10,5 +10,5 @@ app_name = 'api_reviews'
 urlpatterns = [
     path('v1/', include(router.urls)),
     path('v1/auth/signup/', SignupView.as_view()),
-    # path('v1/auth/token/', GetTokenView.as_view())
+    path('v1/auth/token/', GetTokenView.as_view())
 ]
