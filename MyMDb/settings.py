@@ -109,8 +109,11 @@ REST_FRAMEWORK = {
     )
 }
 
+# TODO: Update the tokens lifetime(must be 90 days).
 SIMPLE_JWT = {
-    'ACCESS_TOKE_LIFETIME': timedelta(days=30),
+    "ACCESS_TOKEN_LIFETIME": timedelta(days=365),
+    "REFRESH_TOKEN_LIFETIME": timedelta(days=365),
+    "TOKEN_OBTAIN_SERIALIZER": "api.serializers.EmailTokenObtainPairSerializer",
 }
 
 AUTH_USER_MODEL = 'reviews.Author'

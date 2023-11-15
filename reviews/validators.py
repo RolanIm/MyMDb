@@ -1,6 +1,7 @@
 from django.core import validators
 from django.utils.deconstruct import deconstructible
 from django.utils.translation import gettext_lazy as _
+from rest_framework import serializers
 
 
 @deconstructible
@@ -11,3 +12,12 @@ class UnicodeUsernameValidator(validators.RegexValidator):
         "numbers, and @/./+/-/_ characters."
     )
     flags = 0
+
+
+def validate_username(value):
+    if value == 'me':
+        raise serializers.ValidationError(
+            "Username field can't equals 'me'."
+        )
+    return value
+
