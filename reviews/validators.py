@@ -20,4 +20,3 @@ def validate_username(value):
             "Username field can't equals 'me'."
         )
     return value
-

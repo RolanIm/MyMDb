@@ -3,8 +3,8 @@ from rest_framework import routers
 from .views import GetTokenView, AuthorViewSet, SignupView
 
 router = routers.DefaultRouter()
-router.register(r'users/(?P<username>[\w.@\+\-]+)', AuthorViewSet)
-router.register(r'users/me', AuthorViewSet)
+router.register(r'users', AuthorViewSet)
+# router.register(r'users/(?P<username>[\w.@\+\-]+)', AuthorViewSet)
 
 app_name = 'api_reviews'
 urlpatterns = [

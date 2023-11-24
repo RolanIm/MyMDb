@@ -36,11 +36,9 @@ class Author(AbstractUser):
     )
     email = models.EmailField(_("email address"),
                               unique=True,
-                              blank=True,
-                              null=True,
                               max_length=254)
     role = models.CharField(default=USER, choices=ROLES, max_length=9)
-    bio = models.TextField()
+    bio = models.TextField(blank=True, null=True)
     first_name = models.CharField(_("first name"),
                                   max_length=150,
                                   blank=True)
@@ -74,15 +72,17 @@ class Comment(models.Model):
     author = models.ForeignKey(to=Author, on_delete=models.CASCADE)
     text = models.CharField(_("text"), max_length=256)
     pub_date = models.DateTimeField(_("publication date"), auto_now_add=True)
+    review = models.ForeignKey(to='Review',
+                               on_delete=models.CASCADE,
+                               related_name='comments')
 
 
 class Review(models.Model):
     author = models.ForeignKey(to=Author, on_delete=models.CASCADE)
     text = models.TextField(_("text"))
-    comments = models.ForeignKey(to=Comment,
-                                 on_delete=models.CASCADE,
-                                 blank=True,
-                                 null=True)
+    title = models.ForeignKey(to='Title',
+                              on_delete=models.CASCADE,
+                              related_name='reviews')
     score = models.IntegerField(_("score"), validators=[
         MinValueValidator(1, 'Score must be >= 1'),
         MaxValueValidator(10, 'Score must be <= 10')
@@ -102,10 +102,6 @@ class Title(models.Model):
                                  on_delete=models.SET_NULL,
                                  blank=True,
                                  null=True)
-    reviews = models.ForeignKey(to=Review,
-                                on_delete=models.CASCADE,
-                                blank=True,
-                                null=True)
 
 
 class GenreTitle(models.Model):

@@ -26,7 +26,9 @@ class AuthorSerializer(serializers.ModelSerializer):
     class Meta:
         model = Author
         required_fields = ('email', 'username')
-        fields = ('username', 'email', 'first_name', 'last_name', 'bio', 'role')
+        fields = (
+            'username', 'email', 'first_name', 'last_name', 'bio', 'role'
+        )
 
     @staticmethod
     def validate_username(value):

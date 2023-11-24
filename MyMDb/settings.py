@@ -113,7 +113,7 @@ REST_FRAMEWORK = {
 SIMPLE_JWT = {
     "ACCESS_TOKEN_LIFETIME": timedelta(days=365),
     "REFRESH_TOKEN_LIFETIME": timedelta(days=365),
-    "TOKEN_OBTAIN_SERIALIZER": "api.serializers.EmailTokenObtainPairSerializer",
+    'AUTH_HEADER_TYPES': ('Bearer',),
 }
 
 AUTH_USER_MODEL = 'reviews.Author'

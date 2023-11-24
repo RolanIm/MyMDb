@@ -31,7 +31,10 @@ class Command(BaseCommand):
             with open(csv_directory + csv_file, encoding='utf-8') as csv_data:
                 dict_reader = csv.DictReader(csv_data)
                 model.objects.all().delete()
-                model.objects.bulk_create(model(**data) for data in dict_reader)
+                model.objects.bulk_create(
+                    model(**data) for data in dict_reader
+                )
+            success_msg = f'Successfully import csv data to {model.__name__}.'
             self.stdout.write(
-                self.style.SUCCESS('Successfully import csv data.')
+                self.style.SUCCESS(success_msg)
             )

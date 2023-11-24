@@ -1,10 +1,8 @@
 from rest_framework import status, viewsets, views
-from rest_framework_simplejwt.tokens import RefreshToken
+from rest_framework_simplejwt.tokens import AccessToken
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.response import Response
-
-from django.shortcuts import get_object_or_404
-from django.contrib.auth.tokens import default_token_generator
+from django.contrib.auth import tokens, login
 
 from reviews.models import Author
 from .utils import send_email
@@ -19,7 +17,6 @@ class GetTokenView(views.APIView):
 
     @staticmethod
     def post(request):
-        # TODO: Given token not valid for any token type.
         serializer = GetTokenSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         validated_data = serializer.validated_data
@@ -29,16 +26,17 @@ class GetTokenView(views.APIView):
         try:
             user = Author.objects.get(username=username)
         except Author.DoesNotExist:
-            error_data = {"username": "User does not exist."}
+            error_data = {"username": f"User {username} does not exist."}
             return Response(error_data, status=status.HTTP_404_NOT_FOUND)
 
-        is_token_confirmed = default_token_generator.check_token(
+        is_token_confirmed = tokens.default_token_generator.check_token(
             user,
             token=confirmation_code
         )
         if is_token_confirmed:
-            token = RefreshToken.for_user(user)
-            data = {"username": username, "confirmation_code": token['jti']}
+            login(request, user)
+            token = AccessToken.for_user(user)
+            data = {"token": str(token)}
             return Response(data, status=status.HTTP_200_OK)
 
         error_data = {"confirmation_code": "Confirmation code is wrong."}
@@ -55,7 +53,7 @@ class SignupView(views.APIView):
         username, email = serializer.data['username'], serializer.data['email']
         user, created = Author.objects.get_or_create(username=username,
                                                      email=email)
-        confirmation_code = default_token_generator.make_token(user)
+        confirmation_code = tokens.default_token_generator.make_token(user)
         data = {
             'username': user.username,
             'email': user.email,
@@ -68,22 +66,23 @@ class SignupView(views.APIView):
 class AuthorViewSet(viewsets.ModelViewSet):
     queryset = Author.objects.all()
     serializer_class = AuthorSerializer
+    lookup_field = 'username'
     permission_classes = (IsAdminUser,)
 
     def get_object(self):
-        desired_username = self.kwargs.get('username')
-        if desired_username:
-            return get_object_or_404(self.queryset, username=desired_username)
-        return self.request.user
+        if self.kwargs.get('username') == 'me':
+            return self.request.user
+        return super().get_object()
 
     def get_permissions(self):
         if (self.action in ('retrieve', 'partial_update')
-                and self.request.user == self.get_object()):
+                and self.kwargs.get('username') == 'me'):
             return (IsAuthenticated(),)
         return super().get_permissions()
 
     def destroy(self, request, *args, **kwargs):
-        if request.user == self.get_object():
+        if request.user == super().get_object():
             request.data["username"] = "You can't destroy yourself account."
-            return Response(data=request.data, status=status.HTTP_403_FORBIDDEN)
+            return Response(data=request.data,
+                            status=status.HTTP_403_FORBIDDEN)
         return super().destroy(self, request, *args, **kwargs)
