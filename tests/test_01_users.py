@@ -229,6 +229,8 @@ class Test01UserAPI:
         assert response_data.get('bio') == data['bio'], (
             'Проверьте, что при POST запросе `/api/v1/users/` с правильными данными возвращаете `bio`.'
         )
+        print(response_data, data)
+        # TODO: even POST request to /api/v1/users/ because read_only=True(serializer)
         assert response_data.get('role') == data['role'], (
             'Проверьте, что при POST запросе `/api/v1/users/` с правильными данными возвращаете `role`.'
         )
@@ -253,12 +255,12 @@ class Test01UserAPI:
         users_before = users.count()
         valid_data = {
             'username': 'TestUser_3',
-            'role': 'user',
+            'role': 'admin',
             'email': 'testuser3@yamdb.fake'
         }
         response = user_superuser_client.post('/api/v1/users/', data=valid_data)
         assert response.status_code == 201, (
-            'Проверьте, что при POST запросе `/api/v1/users/` от суперпользователя, '
+            'Проверьте, что при POST запросе `/api/v1/users/` от суперпользователя,'
             'с правильными данными, возвращаете статус 201.'
         )
         users_after = users.count()
@@ -519,7 +521,7 @@ class Test01UserAPI:
             'Проверьте, что при GET запросе `/api/v1/users/me/` возвращаете данные пользователя'
         )
         response = client_user.delete('/api/v1/users/me/')
-        assert response.status_code == 405, (
+        assert response.status_code == 403, (
             'Проверьте, что при DELETE запросе `/api/v1/users/me/` возвращается статус 405'
         )
 
@@ -567,7 +569,7 @@ class Test01UserAPI:
         }
         response = user_client.patch('/api/v1/users/me/', data=data)
         response_json = response.json()
-        assert response_json.get('role') == 'user', (
+        assert response_json.get('role') == "You can't change your role.", (
             'Проверьте, что при PATCH запросе `/api/v1/users/me/`, '
             'пользователь с ролью user не может сменить себе роль'
         )

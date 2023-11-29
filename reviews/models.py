@@ -46,6 +46,18 @@ class Author(AbstractUser):
                                  max_length=150,
                                  blank=True)
 
+    @property
+    def is_admin(self):
+        return self.role == ADMIN or self.is_superuser or self.is_staff
+
+    @property
+    def is_moderator(self):
+        return self.is_authenticated and self.role == MODERATOR
+
+    @property
+    def is_user(self):
+        return self.is_authenticated and self.role == USER
+
     class Meta:
         ordering = ('id',)
         verbose_name = _('author')

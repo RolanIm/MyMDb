@@ -3,7 +3,6 @@ from rest_framework import serializers
 from reviews.models import Author
 from reviews.validators import UnicodeUsernameValidator, validate_username
 
-
 USERNAME_VALIDATORS = [UnicodeUsernameValidator, validate_username]
 
 

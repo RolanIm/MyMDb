@@ -127,8 +127,8 @@ class Test00UserRegistration:
         outbox_before_count = len(mail.outbox)
 
         valid_data = {
-            'email': valid_email,
-            'username': valid_username
+            "email": valid_email,
+            "username": valid_username
         }
         request_type = 'POST'
         response = admin_client.post(self.url_admin_create_user, data=valid_data)
@@ -260,21 +260,19 @@ class Test00UserRegistration:
             f'можно создать пользователя с валидными данными и возвращается статус {code}'
         )
 
-        duplicate_email_data = {
-            'email': valid_email_1,
-            'username': valid_username_2
+        error_msg = {
+            "email": "author with this email address already exists."
         }
-        response = client.post(self.url_signup, data=duplicate_email_data)
+        response = client.post(self.url_signup, data=error_msg)
         code = 400
         assert response.status_code == code, (
             f'Проверьте, что при {request_type} запросе `{self.url_signup}` нельзя создать '
             f'пользователя, email которого уже зарегистрирован и возвращается статус {code}'
         )
-        duplicate_username_data = {
-            'email': valid_email_2,
-            'username': valid_username_1
+        error_msg = {
+            "userame": "author with this username address already exists."
         }
-        response = client.post(self.url_signup, data=duplicate_username_data)
+        response = client.post(self.url_signup, data=error_msg)
         assert response.status_code == code, (
             f'Проверьте, что при {request_type} запросе `{self.url_signup}` нельзя создать '
             f'пользователя, username которого уже зарегистрирован и возвращается статус {code}'

@@ -4,7 +4,7 @@ from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.response import Response
 from django.contrib.auth import tokens, login
 
-from reviews.models import Author
+from reviews.models import Author, ADMIN
 from .utils import send_email
 from .serializers import (GetTokenSerializer,
                           AuthorSerializer,
@@ -28,7 +28,6 @@ class GetTokenView(views.APIView):
         except Author.DoesNotExist:
             error_data = {"username": f"User {username} does not exist."}
             return Response(error_data, status=status.HTTP_404_NOT_FOUND)
-
         is_token_confirmed = tokens.default_token_generator.check_token(
             user,
             token=confirmation_code
@@ -80,9 +79,18 @@ class AuthorViewSet(viewsets.ModelViewSet):
             return (IsAuthenticated(),)
         return super().get_permissions()
 
+    def partial_update(self, request, *args, **kwargs):
+        if (not request.data.get('role') or
+                isinstance(self.get_permissions()[0], IsAdminUser)):
+            return super().partial_update(request, *args, **kwargs)
+        error_msg = {
+            "role": "You can't change your role."
+        }
+        return Response(data=error_msg, status=status.HTTP_403_FORBIDDEN)
+
     def destroy(self, request, *args, **kwargs):
-        if request.user == super().get_object():
-            request.data["username"] = "You can't destroy yourself account."
-            return Response(data=request.data,
-                            status=status.HTTP_403_FORBIDDEN)
+        if request.user == self.get_object():
+            erorr_msg = {"username": "You can't destroy yourself account."}
+            return Response(data=erorr_msg,
+                            status=status.HTTP_405_METHOD_NOT_ALLOWED)
         return super().destroy(self, request, *args, **kwargs)

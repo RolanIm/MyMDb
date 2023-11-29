@@ -44,7 +44,9 @@ def user_superuser_client(token_user_superuser):
     from rest_framework.test import APIClient
 
     client = APIClient()
-    client.credentials(HTTP_AUTHORIZATION=f'Bearer {token_user_superuser["access"]}')
+    client.credentials(
+        HTTP_AUTHORIZATION=f'Bearer {token_user_superuser["access"]}'
+    )
     return client
 
 
