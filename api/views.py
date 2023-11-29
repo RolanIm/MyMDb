@@ -12,6 +12,7 @@ from .serializers import (GetTokenSerializer,
                           CategorySerilizer,
                           GenreSerilizer)
 from .permissions import IsAdminUser
+from .viewsets import ListCreateDestroyViewSet
 
 
 class GetTokenView(views.APIView):
@@ -98,18 +99,11 @@ class AuthorViewSet(viewsets.ModelViewSet):
         return super().destroy(self, request, *args, **kwargs)
 
 
-class CategoryViewSet(mixins.ListModelMixin,
-                      mixins.CreateModelMixin,
-                      mixins.DestroyModelMixin,
-                      viewsets.GenericViewSet):
+class CategoryViewSet(ListCreateDestroyViewSet):
     queryset = Category.objects.all()
     serializer_class = CategorySerilizer
-    permission_classes = (IsAdminUser,)
-    filter_backends = (filters.SearchFilter,)
-    lookup_field = 'slug'
-    search_fields = ('name',)
 
-    def get_permissions(self):
-        if self.action == 'list':
-            return (AllowAny(),)
-        return super().get_permissions()
+
+class GenreViewSet(ListCreateDestroyViewSet):
+    queryset = Genre.objects.all()
+    serializer_class = GenreSerilizer

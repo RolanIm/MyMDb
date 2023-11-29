@@ -1,10 +1,12 @@
 from django.urls import path, include
 from rest_framework import routers
-from .views import GetTokenView, AuthorViewSet, SignupView, CategoryViewSet
+from .views import (GetTokenView, AuthorViewSet, SignupView,
+                    CategoryViewSet, GenreViewSet)
 
 router = routers.DefaultRouter()
 router.register(r'users', AuthorViewSet)
 router.register(r'categories', CategoryViewSet)
+router.register(r'genres', GenreViewSet)
 
 app_name = 'api_reviews'
 urlpatterns = [
