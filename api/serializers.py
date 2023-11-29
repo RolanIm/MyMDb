@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from reviews.models import Author
+from reviews.models import Author, Category, Genre, Title
 from reviews.validators import UnicodeUsernameValidator, validate_username
 
 USERNAME_VALIDATORS = [UnicodeUsernameValidator, validate_username]
@@ -32,3 +32,20 @@ class AuthorSerializer(serializers.ModelSerializer):
     @staticmethod
     def validate_username(value):
         return validate_username(value)
+
+
+class CategorySerilizer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Category
+        required_fields = ('name', 'slug')
+        fields = ('name', 'slug')
+
+
+class GenreSerilizer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Genre
+        required_fields = ('name', 'slug')
+        fields = ('name', 'slug')
+

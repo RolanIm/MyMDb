@@ -1,14 +1,16 @@
-from rest_framework import status, viewsets, views
+from rest_framework import status, viewsets, views, mixins, filters
 from rest_framework_simplejwt.tokens import AccessToken
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.response import Response
 from django.contrib.auth import tokens, login
 
-from reviews.models import Author, ADMIN
+from reviews.models import Author, Category, Genre, Title
 from .utils import send_email
 from .serializers import (GetTokenSerializer,
                           AuthorSerializer,
-                          SignupSerializer)
+                          SignupSerializer,
+                          CategorySerilizer,
+                          GenreSerilizer)
 from .permissions import IsAdminUser
 
 
@@ -94,3 +96,20 @@ class AuthorViewSet(viewsets.ModelViewSet):
             return Response(data=erorr_msg,
                             status=status.HTTP_405_METHOD_NOT_ALLOWED)
         return super().destroy(self, request, *args, **kwargs)
+
+
+class CategoryViewSet(mixins.ListModelMixin,
+                      mixins.CreateModelMixin,
+                      mixins.DestroyModelMixin,
+                      viewsets.GenericViewSet):
+    queryset = Category.objects.all()
+    serializer_class = CategorySerilizer
+    permission_classes = (IsAdminUser,)
+    filter_backends = (filters.SearchFilter,)
+    lookup_field = 'slug'
+    search_fields = ('name',)
+
+    def get_permissions(self):
+        if self.action == 'list':
+            return (AllowAny(),)
+        return super().get_permissions()
