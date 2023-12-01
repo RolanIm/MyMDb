@@ -5,7 +5,6 @@ from django.utils.translation import gettext_lazy as _
 
 from .validators import UnicodeUsernameValidator, validate_username
 
-
 USER = 'user'
 MODERATOR = 'moderator'
 ADMIN = 'admin'
@@ -18,7 +17,6 @@ ROLES = [
 
 
 class Author(AbstractUser):
-
     username_validators = [UnicodeUsernameValidator, validate_username]
 
     username = models.CharField(
@@ -103,13 +101,13 @@ class Review(models.Model):
 
 
 class Title(models.Model):
-    name = models.CharField(_("name"), max_length=256)  # required
+    name = models.CharField(_("name"), max_length=256)
     year = models.IntegerField(_("year"))
-    # average_rating = models.IntegerField() in the serializer
     description = models.TextField(_("description"),
                                    blank=True,
                                    null=True)
-    genre = models.ManyToManyField(Genre, through='GenreTitle')
+    genre = models.ManyToManyField(Genre,
+                                   through='GenreTitle')
     category = models.ForeignKey(to=Category,
                                  on_delete=models.SET_NULL,
                                  blank=True,

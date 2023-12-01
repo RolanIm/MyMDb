@@ -230,7 +230,6 @@ class Test01UserAPI:
             'Проверьте, что при POST запросе `/api/v1/users/` с правильными данными возвращаете `bio`.'
         )
         print(response_data, data)
-        # TODO: even POST request to /api/v1/users/ because read_only=True(serializer)
         assert response_data.get('role') == data['role'], (
             'Проверьте, что при POST запросе `/api/v1/users/` с правильными данными возвращаете `role`.'
         )
