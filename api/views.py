@@ -11,7 +11,8 @@ from .serializers import (GetTokenSerializer,
                           SignupSerializer,
                           CategorySerializer,
                           GenreSerializer,
-                          TitleSerializer)
+                          TitleSerializer,
+                          TitleWriteSerializer)
 from .permissions import IsAdminUser
 from .viewsets import ListCreateDestroyViewSet
 
@@ -119,6 +120,11 @@ class TitleViewSet(viewsets.ModelViewSet):
     filter_backends = (filters.SearchFilter,)
     search_fields = ('category__slug', 'genre__slug', 'name', 'year')
     permission_classes = (IsAdminUser,)
+
+    def get_serializer_class(self):
+        if self.action in ('post', 'partial_update', 'update'):
+            return TitleWriteSerializer
+        return self.serializer_class
 
     def get_permissions(self):
         if self.action in ('retrieve', 'list'):

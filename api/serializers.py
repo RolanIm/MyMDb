@@ -1,11 +1,11 @@
 from django.db.models import Avg, F
+
 from rest_framework import serializers
 
 import datetime as dt
 
-from reviews.models import Author, Category, Genre, Title, GenreTitle
+from reviews.models import Author, Category, Genre, Title
 from reviews.validators import UnicodeUsernameValidator, validate_username
-
 
 USERNAME_VALIDATORS = [UnicodeUsernameValidator, validate_username]
 
@@ -33,7 +33,6 @@ class SignupSerializer(serializers.Serializer):
 
 
 class AuthorSerializer(serializers.ModelSerializer):
-
     class Meta:
         model = Author
         required_fields = ('email', 'username')
@@ -52,7 +51,7 @@ class CategorySerializer(serializers.ModelSerializer):
     class Meta:
         model = Category
         required_fields = ('name', 'slug')
-        fields = ('name', 'slug')
+        fields = '__all__'
 
 
 class GenreSerializer(serializers.ModelSerializer):
@@ -61,13 +60,13 @@ class GenreSerializer(serializers.ModelSerializer):
     class Meta:
         model = Genre
         required_fields = ('name', 'slug')
-        fields = ('name', 'slug')
+        fields = '__all__'
 
 
 class TitleSerializer(serializers.ModelSerializer):
     rating = serializers.SerializerMethodField()
-    genre = GenreSerializer(many=True)
-    category = CategorySerializer()
+    genre = GenreSerializer(many=True, read_only=True)
+    category = CategorySerializer(many=False, read_only=True)
 
     class Meta:
         model = Title
@@ -80,27 +79,19 @@ class TitleSerializer(serializers.ModelSerializer):
             rating=Avg(F('score'), default=0))
         return result['rating']
 
-    def create(self, validated_data):
-        title = Title.objects.create(**validated_data)
-        if 'genre' in self.initial_data:
-            genres = validated_data.pop('genre')
-            title = Title.objects.create(**validated_data)
-            for genre in genres:
-                current_genre, status = Genre.objects.get_or_create(
-                    name=genre,
-                    slug=genre
-                )
-                GenreTitle.objects.create(title=title, genre=current_genre)
-        if 'category' in self.initial_data:
-            categories = validated_data.pop('category')
-            title = Title.objects.create(**validated_data)
-            for category in categories:
-                current_category, status = Category.objects.get_or_create(
-                    name=category,
-                    slug=category
-                )
-                GenreTitle.objects.create(title=title, genre=current_category)
-        return title
+
+class TitleWriteSerializer(serializers.ModelSerializer):
+    # TODO: title object is creating, but genre and category fields are not.
+    genre = serializers.SlugRelatedField(queryset=Genre.objects.all(),
+                                         many=True,
+                                         slug_field='slug')
+    category = serializers.SlugRelatedField(slug_field='slug',
+                                            queryset=Category.objects.all())
+
+    class Meta:
+        model = Title
+        required_fields = ('name', 'year', 'genre', 'category')
+        fields = '__all__'
 
     @staticmethod
     def validate_year(year):
