@@ -1,7 +1,6 @@
 import os
 from datetime import timedelta
 from decouple import config
-from pathlib import Path
 
 SECRET_KEY = config('SECRET_KEY')
 
@@ -112,7 +111,7 @@ REST_FRAMEWORK = {
     'PAGE_SIZE': 5
 }
 
-# TODO: Update the tokens lifetime(must be 90 days).
+# TODO: Update the tokens lifetime(must be 14 days).
 SIMPLE_JWT = {
     "ACCESS_TOKEN_LIFETIME": timedelta(days=365),
     "REFRESH_TOKEN_LIFETIME": timedelta(days=365),

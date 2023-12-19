@@ -34,7 +34,9 @@ class Command(BaseCommand):
                 model.objects.bulk_create(
                     model(**data) for data in dict_reader
                 )
-            success_msg = f'Successfully import csv data to {model.__name__}.'
+            success_msg = (
+                f'Successfully import {csv_file} file to {model.__name__} model'
+            )
             self.stdout.write(
                 self.style.SUCCESS(success_msg)
             )
