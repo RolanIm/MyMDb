@@ -5,7 +5,6 @@ from django.utils.translation import gettext_lazy as _
 
 from .validators import UnicodeUsernameValidator, validate_username
 
-
 USER = 'user'
 MODERATOR = 'moderator'
 ADMIN = 'admin'
@@ -16,9 +15,20 @@ ROLES = [
     (ADMIN, ADMIN),
 ]
 
+GENRES = [
+    (genre, genre) for genre in ('drama', 'comedy', 'western', 'fantasy',
+                                 'sci-fi', 'detective', 'thriller', 'tale',
+                                 'gonzo', 'roman', 'ballad', 'rock-n-roll',
+                                 'classical', 'rock', 'chanson')
+]
+CATEGORIES = [
+    ('movie', 'movie'),
+    ('book', 'book'),
+    ('music', 'music')
+]
+
 
 class Author(AbstractUser):
-
     username_validators = [UnicodeUsernameValidator, validate_username]
 
     username = models.CharField(
@@ -103,17 +113,19 @@ class Review(models.Model):
 
 
 class Title(models.Model):
-    name = models.CharField(_("name"), max_length=256)  # required
+    name = models.CharField(_("name"), max_length=256)
     year = models.IntegerField(_("year"))
-    # average_rating = models.IntegerField() in the serializer
     description = models.TextField(_("description"),
                                    blank=True,
                                    null=True)
-    genre = models.ManyToManyField(Genre, through='GenreTitle')
+    genre = models.ManyToManyField(Genre,
+                                   through='GenreTitle',
+                                   choices=GENRES)
     category = models.ForeignKey(to=Category,
                                  on_delete=models.SET_NULL,
                                  blank=True,
-                                 null=True)
+                                 null=True,
+                                 choices=CATEGORIES)
 
 
 class GenreTitle(models.Model):

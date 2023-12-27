@@ -47,6 +47,12 @@ python manage.py makemigrations
 python manage.py migrate
 ```
 
+Import csv data to models:
+
+```
+python manage.py import_csv
+```
+
 Run the `manage.py` file: 
 
 ```
