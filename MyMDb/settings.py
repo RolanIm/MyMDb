@@ -1,7 +1,6 @@
 import os
 from datetime import timedelta
 from decouple import config
-from pathlib import Path
 
 SECRET_KEY = config('SECRET_KEY')
 
@@ -21,6 +20,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'django_filters',
     'rest_framework',
     'rest_framework_simplejwt',
     'api.apps.ApiConfig',
@@ -112,7 +112,7 @@ REST_FRAMEWORK = {
     'PAGE_SIZE': 5
 }
 
-# TODO: Update the tokens lifetime(must be 90 days).
+# TODO: Update the tokens lifetime(must be 14 days).
 SIMPLE_JWT = {
     "ACCESS_TOKEN_LIFETIME": timedelta(days=365),
     "REFRESH_TOKEN_LIFETIME": timedelta(days=365),
@@ -128,3 +128,5 @@ EMAIL_HOST_PORT = config('EMAIL_HOST_PORT')
 EMAIL_USE_TLS = config('EMAIL_USE_TLS')
 EMAIL_HOST_USER = config('EMAIL_HOST_USER')
 EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD')
+
+FILTERS_DEFAULT_LOOKUP_EXPR = 'icontains'

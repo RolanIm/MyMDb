@@ -1,16 +1,19 @@
-from rest_framework import status, viewsets, views, mixins, filters
+from rest_framework import status, viewsets, views
 from rest_framework_simplejwt.tokens import AccessToken
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.response import Response
 from django.contrib.auth import tokens, login
+from django_filters.rest_framework import DjangoFilterBackend
 
-from reviews.models import Author, Category, Genre, Title
+from reviews.models import Author, Category, Genre, Title, ADMIN
 from .utils import send_email
 from .serializers import (GetTokenSerializer,
                           AuthorSerializer,
                           SignupSerializer,
-                          CategorySerilizer,
-                          GenreSerilizer)
+                          CategorySerializer,
+                          GenreSerializer,
+                          TitleSerializer,
+                          TitleWriteSerializer)
 from .permissions import IsAdminUser
 from .viewsets import ListCreateDestroyViewSet
 
@@ -55,6 +58,9 @@ class SignupView(views.APIView):
         username, email = serializer.data['username'], serializer.data['email']
         user, created = Author.objects.get_or_create(username=username,
                                                      email=email)
+        if user.is_admin and user.role != ADMIN:
+            user.role = ADMIN
+            user.save()
         confirmation_code = tokens.default_token_generator.make_token(user)
         data = {
             'username': user.username,
@@ -93,17 +99,35 @@ class AuthorViewSet(viewsets.ModelViewSet):
 
     def destroy(self, request, *args, **kwargs):
         if request.user == self.get_object():
-            erorr_msg = {"username": "You can't destroy yourself account."}
-            return Response(data=erorr_msg,
+            error_msg = {"username": "You can't destroy yourself account."}
+            return Response(data=error_msg,
                             status=status.HTTP_405_METHOD_NOT_ALLOWED)
         return super().destroy(self, request, *args, **kwargs)
 
 
 class CategoryViewSet(ListCreateDestroyViewSet):
     queryset = Category.objects.all()
-    serializer_class = CategorySerilizer
+    serializer_class = CategorySerializer
 
 
 class GenreViewSet(ListCreateDestroyViewSet):
     queryset = Genre.objects.all()
-    serializer_class = GenreSerilizer
+    serializer_class = GenreSerializer
+
+
+class TitleViewSet(viewsets.ModelViewSet):
+    queryset = Title.objects.all()
+    serializer_class = TitleSerializer
+    filter_backends = (DjangoFilterBackend,)
+    filterset_fields = ('category__slug', 'genre__slug', 'name', 'year',)
+    permission_classes = (IsAdminUser,)
+
+    def get_serializer_class(self):
+        if self.action in ('create', 'partial_update', 'update'):
+            return TitleWriteSerializer
+        return self.serializer_class
+
+    def get_permissions(self):
+        if self.action in ('retrieve', 'list'):
+            return (AllowAny(),)
+        return super().get_permissions()
