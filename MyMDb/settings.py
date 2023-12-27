@@ -20,6 +20,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'django_filters',
     'rest_framework',
     'rest_framework_simplejwt',
     'api.apps.ApiConfig',
@@ -127,3 +128,5 @@ EMAIL_HOST_PORT = config('EMAIL_HOST_PORT')
 EMAIL_USE_TLS = config('EMAIL_USE_TLS')
 EMAIL_HOST_USER = config('EMAIL_HOST_USER')
 EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD')
+
+FILTERS_DEFAULT_LOOKUP_EXPR = 'icontains'

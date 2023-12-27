@@ -15,6 +15,18 @@ ROLES = [
     (ADMIN, ADMIN),
 ]
 
+GENRES = [
+    (genre, genre) for genre in ('drama', 'comedy', 'western', 'fantasy',
+                                 'sci-fi', 'detective', 'thriller', 'tale',
+                                 'gonzo', 'roman', 'ballad', 'rock-n-roll',
+                                 'classical', 'rock', 'chanson')
+]
+CATEGORIES = [
+    ('movie', 'movie'),
+    ('book', 'book'),
+    ('music', 'music')
+]
+
 
 class Author(AbstractUser):
     username_validators = [UnicodeUsernameValidator, validate_username]
@@ -107,11 +119,13 @@ class Title(models.Model):
                                    blank=True,
                                    null=True)
     genre = models.ManyToManyField(Genre,
-                                   through='GenreTitle')
+                                   through='GenreTitle',
+                                   choices=GENRES)
     category = models.ForeignKey(to=Category,
                                  on_delete=models.SET_NULL,
                                  blank=True,
-                                 null=True)
+                                 null=True,
+                                 choices=CATEGORIES)
 
 
 class GenreTitle(models.Model):

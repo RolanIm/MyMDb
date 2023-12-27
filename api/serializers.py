@@ -9,14 +9,6 @@ from reviews.validators import UnicodeUsernameValidator, validate_username
 
 USERNAME_VALIDATORS = [UnicodeUsernameValidator, validate_username]
 
-GENRES = [
-    (genre, genre) for genre in ('drama', 'comedy', 'western', 'fantasy',
-                                 'sci-fi', 'detective', 'thriller', 'tale',
-                                 'gonzo', 'roman', 'ballad', 'rock-n-roll',
-                                 'classical', 'rock', 'chanson')
-]
-CATEGORIES = ('movie', 'book', 'music')
-
 
 class GetTokenSerializer(serializers.Serializer):
     username = serializers.CharField(max_length=150,
@@ -46,21 +38,17 @@ class AuthorSerializer(serializers.ModelSerializer):
 
 
 class CategorySerializer(serializers.ModelSerializer):
-    slug = serializers.ChoiceField(choices=CATEGORIES)
-
     class Meta:
         model = Category
         required_fields = ('name', 'slug')
-        fields = '__all__'
+        fields = ('name', 'slug')
 
 
 class GenreSerializer(serializers.ModelSerializer):
-    slug = serializers.ChoiceField(choices=GENRES)
-
     class Meta:
         model = Genre
         required_fields = ('name', 'slug')
-        fields = '__all__'
+        fields = ('name', 'slug')
 
 
 class TitleSerializer(serializers.ModelSerializer):
@@ -71,17 +59,17 @@ class TitleSerializer(serializers.ModelSerializer):
     class Meta:
         model = Title
         required_fields = ('name', 'year', 'genre', 'category')
-        fields = ('name', 'year', 'rating', 'description', 'genre', 'category')
+        fields = '__all__'
 
     @staticmethod
     def get_rating(obj):
         result = obj.reviews.aggregate(
-            rating=Avg(F('score'), default=0))
+            rating=Avg(F('score'), default=None))
         return result['rating']
 
 
 class TitleWriteSerializer(serializers.ModelSerializer):
-    # TODO: title object is creating, but genre and category fields are not.
+    rating = serializers.SerializerMethodField()
     genre = serializers.SlugRelatedField(queryset=Genre.objects.all(),
                                          many=True,
                                          slug_field='slug')
@@ -95,7 +83,14 @@ class TitleWriteSerializer(serializers.ModelSerializer):
 
     @staticmethod
     def validate_year(year):
-        return year <= dt.datetime.now().year
+        if not year <= dt.datetime.now().year:
+            raise serializers.ValidationError(
+                "year field can't be in the feature"
+            )
+        return year
 
-    # def create(self, validated_data):
-    #     ...
+    @staticmethod
+    def get_rating(obj):
+        result = obj.reviews.aggregate(
+            rating=Avg(F('score'), default=None))
+        return result['rating']

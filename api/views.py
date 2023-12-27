@@ -1,8 +1,9 @@
-from rest_framework import status, viewsets, views, mixins, filters
+from rest_framework import status, viewsets, views
 from rest_framework_simplejwt.tokens import AccessToken
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.response import Response
 from django.contrib.auth import tokens, login
+from django_filters.rest_framework import DjangoFilterBackend
 
 from reviews.models import Author, Category, Genre, Title, ADMIN
 from .utils import send_email
@@ -117,12 +118,12 @@ class GenreViewSet(ListCreateDestroyViewSet):
 class TitleViewSet(viewsets.ModelViewSet):
     queryset = Title.objects.all()
     serializer_class = TitleSerializer
-    filter_backends = (filters.SearchFilter,)
-    search_fields = ('category__slug', 'genre__slug', 'name', 'year')
+    filter_backends = (DjangoFilterBackend,)
+    filterset_fields = ('category__slug', 'genre__slug', 'name', 'year',)
     permission_classes = (IsAdminUser,)
 
     def get_serializer_class(self):
-        if self.action in ('post', 'partial_update', 'update'):
+        if self.action in ('create', 'partial_update', 'update'):
             return TitleWriteSerializer
         return self.serializer_class
 

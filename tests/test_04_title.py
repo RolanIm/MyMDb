@@ -1,3 +1,5 @@
+import json
+
 import pytest
 
 from .common import (auth_client, create_categories, create_genre,
@@ -115,18 +117,19 @@ class Test04TitleAPI:
         data = {'name': 'Поворот', 'year': 2020, 'genre': [genres[1]['slug']],
                 'category': categories[1]['slug'], 'description': 'Крутое пике'}
         admin_client.post('/api/v1/titles/', data=data)
-        response = admin_client.get(f'/api/v1/titles/?genre={genres[1]["slug"]}')
+        response = admin_client.get(f'/api/v1/titles/?genre__slug={genres[1]["slug"]}')
         data = response.json()
         assert len(data['results']) == 2, (
             'Проверьте, что при GET запросе `/api/v1/titles/` фильтуется по `genre` параметру `slug` жанра'
         )
-        response = admin_client.get(f'/api/v1/titles/?category={categories[0]["slug"]}')
+        response = admin_client.get(f'/api/v1/titles/?category__slug={categories[0]["slug"]}')
         data = response.json()
         assert len(data['results']) == 1, (
             'Проверьте, что при GET запросе `/api/v1/titles/` фильтуется по `category` параметру `slug` категории'
         )
         response = admin_client.get('/api/v1/titles/?year=2000')
         data = response.json()
+        print(f"|||{json.dumps(data, indent=4)}|||")
         assert len(data['results']) == 1, (
             'Проверьте, что при GET запросе `/api/v1/titles/` фильтуется по `year` параметру года'
         )
