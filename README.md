@@ -1,5 +1,5 @@
 # MyMDb API
-### API для сервиса оценки произведений
+### API for the arts evaluation web app
 
 <p align="center">
 <img src="https://img.shields.io/badge/Python-100000?style=for-the-badge&logo=python&logoColor=FFFFFF&labelColor=306998&color=black">
