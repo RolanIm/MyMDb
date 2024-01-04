@@ -10,7 +10,8 @@ from django.contrib.auth import tokens, login
 from django_filters.rest_framework import DjangoFilterBackend
 from django.db import IntegrityError
 
-from reviews.models import Author, Category, Genre, Title, ADMIN, Review
+from reviews.models import (Author, Category, Genre, Title, ADMIN,
+                            Review, Comment)
 from .utils import send_email
 from .serializers import (GetTokenSerializer,
                           AuthorSerializer,
@@ -19,7 +20,8 @@ from .serializers import (GetTokenSerializer,
                           GenreSerializer,
                           TitleSerializer,
                           TitleWriteSerializer,
-                          ReviewSerializer)
+                          ReviewSerializer,
+                          CommentSerializer)
 from .permissions import IsAdminUser, IsOwnerOrModeratorOrAdmin
 from .viewsets import ListCreateDestroyViewSet
 
@@ -176,3 +178,30 @@ class ReviewViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         title = get_object_or_404(Title, pk=self.kwargs.get('title_id'))
         return self.queryset.filter(title=title)
+
+
+class CommentViewSet(viewsets.ModelViewSet):
+    queryset = Comment.objects.all()
+    serializer_class = CommentSerializer
+    permission_classes = (IsAuthenticatedOrReadOnly,)
+
+    def get_permissions(self):
+        if self.action in ('destroy', 'partial_update'):
+            return (IsOwnerOrModeratorOrAdmin(),)
+        return super().get_permissions()
+
+    def get_queryset(self):
+        review = get_object_or_404(
+            Review,
+            pk=self.kwargs.get('review_id'),
+            title__pk=self.kwargs.get('title_id')
+        )
+        return self.queryset.filter(review=review)
+
+    def perform_create(self, serializer):
+        review = get_object_or_404(
+            Review,
+            pk=self.kwargs.get('review_id'),
+            title__pk=self.kwargs.get('title_id')
+        )
+        serializer.save(author=self.request.user, review=review)
