@@ -1,3 +1,5 @@
+import json
+
 import pytest
 
 from .common import (auth_client, create_reviews, create_titles,
@@ -45,6 +47,7 @@ class Test05ReviewAPI:
             'score': 1
         }
         response = admin_client.post(f'/api/v1/titles/{titles[0]["id"]}/reviews/', data=data)
+        print(json.dumps(admin_client.get(f'/api/v1/titles/{titles[0]["id"]}/reviews/').data, indent=4))
         code = 400
         assert response.status_code == code, (
             'Проверьте, что при POST запросе на `/api/v1/titles/{title_id}/reviews/` '

@@ -4,7 +4,7 @@ from rest_framework import serializers
 
 import datetime as dt
 
-from reviews.models import Author, Category, Genre, Title
+from reviews.models import Author, Category, Genre, Title, Review
 from reviews.validators import UnicodeUsernameValidator, validate_username
 
 USERNAME_VALIDATORS = [UnicodeUsernameValidator, validate_username]
@@ -94,3 +94,13 @@ class TitleWriteSerializer(serializers.ModelSerializer):
         result = obj.reviews.aggregate(
             rating=Avg(F('score'), default=None))
         return result['rating']
+
+
+class ReviewSerializer(serializers.ModelSerializer):
+    author = serializers.SlugRelatedField(slug_field='username',
+                                          read_only=True)
+
+    class Meta:
+        model = Review
+        required_fields = ('text', 'score')
+        fields = ('id', 'text', 'author', 'score', 'pub_date')
