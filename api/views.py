@@ -1,11 +1,16 @@
 from rest_framework import status, viewsets, views
+from rest_framework.generics import get_object_or_404
 from rest_framework_simplejwt.tokens import AccessToken
-from rest_framework.permissions import IsAuthenticated, AllowAny
+from rest_framework.permissions import (IsAuthenticated,
+                                        AllowAny,
+                                        IsAuthenticatedOrReadOnly)
 from rest_framework.response import Response
+
 from django.contrib.auth import tokens, login
 from django_filters.rest_framework import DjangoFilterBackend
+from django.db import IntegrityError
 
-from reviews.models import Author, Category, Genre, Title, ADMIN
+from reviews.models import Author, Category, Genre, Title, ADMIN, Review
 from .utils import send_email
 from .serializers import (GetTokenSerializer,
                           AuthorSerializer,
@@ -13,8 +18,9 @@ from .serializers import (GetTokenSerializer,
                           CategorySerializer,
                           GenreSerializer,
                           TitleSerializer,
-                          TitleWriteSerializer)
-from .permissions import IsAdminUser
+                          TitleWriteSerializer,
+                          ReviewSerializer)
+from .permissions import IsAdminUser, IsOwnerOrModeratorOrAdmin
 from .viewsets import ListCreateDestroyViewSet
 
 
@@ -131,3 +137,42 @@ class TitleViewSet(viewsets.ModelViewSet):
         if self.action in ('retrieve', 'list'):
             return (AllowAny(),)
         return super().get_permissions()
+
+
+class ReviewViewSet(viewsets.ModelViewSet):
+    queryset = Review.objects.all()
+    serializer_class = ReviewSerializer
+    permission_classes = (IsAuthenticatedOrReadOnly,)
+
+    def get_permissions(self):
+        if self.action in ('destroy', 'partial_update'):
+            return (IsOwnerOrModeratorOrAdmin(),)
+        return super().get_permissions()
+
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        try:
+            self.perform_create(serializer)
+        except IntegrityError:
+            return Response(
+                {
+                    'error': 'Review with the same author and title '
+                             'already exists.'
+                },
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        headers = self.get_success_headers(serializer.data)
+        return Response(
+            serializer.data,
+            status=status.HTTP_201_CREATED,
+            headers=headers
+        )
+
+    def perform_create(self, serializer):
+        title = get_object_or_404(Title, pk=self.kwargs.get('title_id'))
+        serializer.save(author=self.request.user, title=title)
+
+    def get_queryset(self):
+        title = get_object_or_404(Title, pk=self.kwargs.get('title_id'))
+        return self.queryset.filter(title=title)
