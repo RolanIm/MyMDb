@@ -112,10 +112,9 @@ REST_FRAMEWORK = {
     'PAGE_SIZE': 5
 }
 
-# TODO: Update the tokens lifetime(must be 14 days).
 SIMPLE_JWT = {
-    "ACCESS_TOKEN_LIFETIME": timedelta(days=365),
-    "REFRESH_TOKEN_LIFETIME": timedelta(days=365),
+    "ACCESS_TOKEN_LIFETIME": timedelta(days=14),
+    "REFRESH_TOKEN_LIFETIME": timedelta(days=14),
     'AUTH_HEADER_TYPES': ('Bearer',),
 }
 
